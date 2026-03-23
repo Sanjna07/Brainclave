@@ -8,9 +8,10 @@
  *   4. History — recent conversation history with optional clear
  */
 
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useMemory } from '../hooks/useMemory';
 import type { Subject, Task, WeakTopic, Note } from '../lib/types';
+import { Book, CheckCircle, AlertTriangle, Clock, FileText, LayoutTemplate, Calendar, MessageSquare, Mic, Camera, Video } from './Icons';
 
 type MemoryPanel = 'subjects' | 'tasks' | 'weak' | 'history';
 
@@ -71,7 +72,7 @@ function SubjectsPanel({ memory }: { memory: ReturnType<typeof useMemory> }) {
 
   return (
     <div className="memory-panel">
-      <h3 className="memory-panel-title">📚 Subjects</h3>
+      <h3 className="memory-panel-title"><Book size={20} className="mr-2" /> Subjects</h3>
 
       {/* Add subject */}
       <div className="memory-input-row">
@@ -99,8 +100,8 @@ function SubjectsPanel({ memory }: { memory: ReturnType<typeof useMemory> }) {
               <span className="subject-name">{s.name}</span>
               <span className="subject-meta">
                 {memory.weakTopics.filter((w) => w.subjectId === s.id).length > 0 && (
-                  <span className="weak-badge">
-                    ⚠ {memory.weakTopics.filter((w) => w.subjectId === s.id).length} weak
+                  <span className="weak-badge" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <AlertTriangle size={14} /> {memory.weakTopics.filter((w) => w.subjectId === s.id).length} weak
                   </span>
                 )}
               </span>
@@ -117,7 +118,7 @@ function SubjectsPanel({ memory }: { memory: ReturnType<typeof useMemory> }) {
                 {/* Notes */}
                 <div className="subject-section">
                   <div className="subject-section-header">
-                    <strong>📝 Notes ({memory.notes.length})</strong>
+                    <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><FileText size={16} /> Notes ({memory.notes.length})</strong>
                     <button className="btn btn-sm" onClick={() => setShowNotes(!showNotes)}>
                       {showNotes ? 'Hide' : 'View'}
                     </button>
@@ -144,12 +145,12 @@ function SubjectsPanel({ memory }: { memory: ReturnType<typeof useMemory> }) {
 
                 {/* Flashcards count */}
                 <div className="subject-section">
-                  <strong>🃏 Flashcards: {memory.flashcards.length}</strong>
+                  <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><LayoutTemplate size={16} /> Flashcards: {memory.flashcards.length}</strong>
                 </div>
 
                 {/* Weak topics for this subject */}
                 <div className="subject-section">
-                  <strong>⚠ Weak Topics ({subjectWeakTopics.length})</strong>
+                  <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><AlertTriangle size={16} /> Weak Topics ({subjectWeakTopics.length})</strong>
                   {subjectWeakTopics.length === 0 && <p className="memory-empty">None marked.</p>}
                   <div className="weak-chips">
                     {subjectWeakTopics.map((w) => (
@@ -199,7 +200,7 @@ function TasksPanel({ memory }: { memory: ReturnType<typeof useMemory> }) {
 
   return (
     <div className="memory-panel">
-      <h3 className="memory-panel-title">✅ Tasks & Deadlines</h3>
+      <h3 className="memory-panel-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={20} /> Tasks & Deadlines</h3>
 
       <div className="tasks-toolbar">
         <div className="filter-tabs">
@@ -299,8 +300,8 @@ function TasksPanel({ memory }: { memory: ReturnType<typeof useMemory> }) {
                     {PRIORITY_LABELS[task.priority]}
                   </span>
                   {task.deadline && (
-                    <span className={deadlineBadgeClass(task)}>
-                      📅 {formatDeadline(task.deadline)}
+                    <span className={deadlineBadgeClass(task)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Calendar size={14} /> {formatDeadline(task.deadline)}
                     </span>
                   )}
                 </div>
@@ -340,7 +341,7 @@ function WeakTopicsPanel({ memory }: { memory: ReturnType<typeof useMemory> }) {
 
   return (
     <div className="memory-panel">
-      <h3 className="memory-panel-title">⚠ Weak Topics</h3>
+      <h3 className="memory-panel-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><AlertTriangle size={20} /> Weak Topics</h3>
       <p className="memory-subtitle">Track topics you're not confident in — resolve them as you improve.</p>
 
       <div className="memory-form">
@@ -391,7 +392,7 @@ function WeakTopicsPanel({ memory }: { memory: ReturnType<typeof useMemory> }) {
           <div className="weak-chips">
             {topics.map((w: WeakTopic) => (
               <div key={w.id} className="weak-chip-full">
-                <span>⚠ {w.topic}</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><AlertTriangle size={14} /> {w.topic}</span>
                 {w.reason && <span className="weak-reason">({w.reason})</span>}
                 <div className="weak-actions">
                   <button className="btn btn-sm" onClick={() => memory.resolveWeakTopic(w.id)} title="Resolved">✓ Got it</button>
@@ -415,13 +416,13 @@ function HistoryPanel({ memory }: { memory: ReturnType<typeof useMemory> }) {
     ? memory.history.filter((h) => h.subjectId === filterSubject)
     : memory.history;
 
-  const modeIcon: Record<string, string> = {
-    text: '💬', voice: '🎙', image: '📷', camera: '📸',
+  const modeIcon: Record<string, React.ReactNode> = {
+    text: <MessageSquare size={16} />, voice: <Mic size={16} />, image: <Camera size={16} />, camera: <Video size={16} />,
   };
 
   return (
     <div className="memory-panel">
-      <h3 className="memory-panel-title">🕑 Conversation History</h3>
+      <h3 className="memory-panel-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Clock size={20} /> Conversation History</h3>
 
       <div className="memory-input-row">
         <select
@@ -452,7 +453,7 @@ function HistoryPanel({ memory }: { memory: ReturnType<typeof useMemory> }) {
           return (
             <div key={entry.id} className={`history-entry history-${entry.role}`}>
               <div className="history-meta">
-                <span className="history-mode">{modeIcon[entry.inputMode] ?? '💬'}</span>
+                <span className="history-mode" style={{ display: 'flex', alignItems: 'center' }}>{modeIcon[entry.inputMode] ?? <MessageSquare size={16} />}</span>
                 <span className="history-role">{entry.role === 'user' ? 'You' : 'AI'}</span>
                 {subject && (
                   <span className="history-subject" style={{ color: subject.color }}>
@@ -480,11 +481,11 @@ export function MemoryTab() {
   const memory = useMemory();
   const [activePanel, setActivePanel] = useState<MemoryPanel>('subjects');
 
-  const panels: { id: MemoryPanel; label: string; icon: string }[] = [
-    { id: 'subjects', label: 'Subjects', icon: '📚' },
-    { id: 'tasks', label: 'Tasks', icon: '✅' },
-    { id: 'weak', label: 'Weak Topics', icon: '⚠' },
-    { id: 'history', label: 'History', icon: '🕑' },
+  const panels: { id: MemoryPanel; label: string; icon: React.ReactNode }[] = [
+    { id: 'subjects', label: 'Subjects', icon: <Book size={18} /> },
+    { id: 'tasks', label: 'Tasks', icon: <CheckCircle size={18} /> },
+    { id: 'weak', label: 'Weak Topics', icon: <AlertTriangle size={18} /> },
+    { id: 'history', label: 'History', icon: <Clock size={18} /> },
   ];
 
   if (memory.loading) {
@@ -508,7 +509,9 @@ export function MemoryTab() {
             className={`memory-nav-btn ${activePanel === p.id ? 'active' : ''}`}
             onClick={() => setActivePanel(p.id)}
           >
-            {p.icon} {p.label}
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {p.icon} {p.label}
+            </span>
           </button>
         ))}
       </nav>

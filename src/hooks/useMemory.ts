@@ -11,7 +11,7 @@ import {
   getSubjects, addSubject, deleteSubject,
   getTasks, addTask, updateTask, markTaskDone, deleteTask,
   getWeakTopics, markWeak, resolveWeakTopic, deleteWeakTopic,
-  getConversationHistory, clearConversationHistory,
+  getConversationHistory, clearConversationHistory, addConversationEntry,
   getDueReminders,
   getNotesBySubject, addNote, deleteNote,
   getFlashcardsBySubject,
@@ -53,6 +53,7 @@ export interface UseMemoryReturn {
 
   // Conversation history
   history: ConversationEntry[];
+  addHistory: (inputMode: 'text'|'voice'|'image'|'camera', role: 'user'|'assistant', content: string, subjectId?: string) => Promise<void>;
   clearHistory: (subjectId?: string) => Promise<void>;
 
   // Notes (per subject, loaded on demand)
@@ -168,6 +169,11 @@ export function useMemory(): UseMemoryReturn {
   }, []);
 
   // ---- History ----
+  const handleAddHistory = useCallback(async (inputMode: 'text'|'voice'|'image'|'camera', role: 'user'|'assistant', content: string, subjectId?: string) => {
+    await addConversationEntry(role, content, inputMode, subjectId);
+    setHistory(await getConversationHistory({ limit: 50 }));
+  }, []);
+
   const handleClearHistory = useCallback(async (subjectId?: string) => {
     await clearConversationHistory(subjectId);
     setHistory(await getConversationHistory({ limit: 50 }));
@@ -216,6 +222,7 @@ export function useMemory(): UseMemoryReturn {
     resolveWeakTopic: handleResolveWeak,
     deleteWeakTopic: handleDeleteWeak,
     history,
+    addHistory: handleAddHistory,
     clearHistory: handleClearHistory,
     notes,
     loadNotes,

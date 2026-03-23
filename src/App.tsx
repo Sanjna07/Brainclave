@@ -1,22 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { initSDK, getAccelerationMode } from './runanywhere';
-import { ChatTab } from './components/ChatTab';
-import { VisionTab } from './components/VisionTab';
-import { VoiceTab } from './components/VoiceTab';
-import { ToolsTab } from './components/ToolsTab';
+import { TutorTab } from './components/TutorTab';
 import { MemoryTab } from './components/MemoryTab';
 import { ReminderBanner } from './components/ReminderBanner';
 import { getDueReminders, markReminderShown } from './lib/memory';
 import type { Reminder } from './lib/types';
 
-type Tab = 'chat' | 'vision' | 'voice' | 'tools' | 'memory';
+type Tab = 'tutor' | 'history';
 
 export function App() {
   const [sdkReady, setSdkReady] = useState(false);
   const [sdkError, setSdkError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<Tab>('memory');
-
-  // Global reminders state — shown above the nav regardless of active tab
+  const [activeTab, setActiveTab] = useState<Tab>('tutor');
   const [reminders, setReminders] = useState<Reminder[]>([]);
 
   useEffect(() => {
@@ -25,10 +20,8 @@ export function App() {
       .catch((err) => setSdkError(err instanceof Error ? err.message : String(err)));
   }, []);
 
-  // Load reminders once on startup (and again when memory tab is visited)
   useEffect(() => {
     getDueReminders(48).then(setReminders);
-    // Re-check every 5 minutes in case the user leaves the tab open
     const interval = setInterval(async () => {
       setReminders(await getDueReminders(48));
     }, 5 * 60 * 1000);
@@ -43,7 +36,8 @@ export function App() {
   if (sdkError) {
     return (
       <div className="app-loading">
-        <h2>SDK Error</h2>
+        <div className="app-error-icon">!</div>
+        <h2>Startup Error</h2>
         <p className="error-text">{sdkError}</p>
       </div>
     );
@@ -52,9 +46,9 @@ export function App() {
   if (!sdkReady) {
     return (
       <div className="app-loading">
-        <div className="spinner" />
-        <h2>Loading RunAnywhere SDK...</h2>
-        <p>Initializing on-device AI engine</p>
+        <div className="bc-spinner" />
+        <h2>BrainClave</h2>
+        <p>Initialising on-device AI…</p>
       </div>
     );
   }
@@ -63,38 +57,51 @@ export function App() {
 
   return (
     <div className="app">
-      {/* Global reminder banners */}
       <ReminderBanner reminders={reminders} onDismiss={handleDismissReminder} />
 
-      <header className="app-header">
-        <h1>RunAnywhere AI</h1>
-        {accel && <span className="badge">{accel === 'webgpu' ? 'WebGPU' : 'CPU'}</span>}
+      <header className="bc-header">
+        <div className="bc-header-left">
+          <div className="bc-logo">BC</div>
+          <div className="bc-header-text">
+            <span className="bc-title">BrainClave</span>
+            <span className="bc-subtitle">Study OS</span>
+          </div>
+        </div>
+        {accel && (
+          <span className="bc-badge">{accel === 'webgpu' ? 'WebGPU' : 'CPU'}</span>
+        )}
       </header>
 
-      <nav className="tab-bar">
-        <button className={activeTab === 'memory' ? 'active' : ''} onClick={() => setActiveTab('memory')}>
-          🧠 Memory
+      <nav className="bc-nav">
+        <button
+          className={`bc-nav-btn ${activeTab === 'tutor' ? 'active' : ''}`}
+          onClick={() => setActiveTab('tutor')}
+        >
+          <span className="bc-nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.58 3.44 2 2 0 0 1 3.57 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.1a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.03z"/>
+            </svg>
+          </span>
+          Tutor
         </button>
-        <button className={activeTab === 'chat' ? 'active' : ''} onClick={() => setActiveTab('chat')}>
-          💬 Chat
-        </button>
-        <button className={activeTab === 'vision' ? 'active' : ''} onClick={() => setActiveTab('vision')}>
-          📷 Vision
-        </button>
-        <button className={activeTab === 'voice' ? 'active' : ''} onClick={() => setActiveTab('voice')}>
-          🎙️ Voice
-        </button>
-        <button className={activeTab === 'tools' ? 'active' : ''} onClick={() => setActiveTab('tools')}>
-          🔧 Tools
+        <button
+          className={`bc-nav-btn ${activeTab === 'history' ? 'active' : ''}`}
+          onClick={() => setActiveTab('history')}
+        >
+          <span className="bc-nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+              <path d="M12 7v5l4 2"/>
+            </svg>
+          </span>
+          History
         </button>
       </nav>
 
       <main className="tab-content">
-        {activeTab === 'memory' && <MemoryTab />}
-        {activeTab === 'chat' && <ChatTab />}
-        {activeTab === 'vision' && <VisionTab />}
-        {activeTab === 'voice' && <VoiceTab />}
-        {activeTab === 'tools' && <ToolsTab />}
+        {activeTab === 'tutor' && <TutorTab />}
+        {activeTab === 'history' && <MemoryTab />}
       </main>
     </div>
   );

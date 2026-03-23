@@ -1,5 +1,6 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { VoicePipeline, ModelCategory, ModelManager, AudioCapture, AudioPlayback, SpeechActivity } from '@runanywhere/web';
+import { useMemory } from '../hooks/useMemory';
 import { VAD } from '@runanywhere/web-onnx';
 import { useModelLoader } from '../hooks/useModelLoader';
 import { ModelBanner } from './ModelBanner';
@@ -11,6 +12,26 @@ export function VoiceTab() {
   const sttLoader = useModelLoader(ModelCategory.SpeechRecognition, undefined, true);
   const ttsLoader = useModelLoader(ModelCategory.SpeechSynthesis, undefined, true);
   const vadLoader = useModelLoader(ModelCategory.Audio, undefined, true);
+
+  const memory = useMemory();
+
+  const systemPrompt = useMemo(() => {
+    const subs = memory.subjects.map(s => s.name).join(', ');
+    const weaks = memory.weakTopics.map(w => w.topic).join(', ');
+    const tasks = memory.tasks.filter(t => t.status === 'pending').map(t => t.title).join(', ');
+    
+    return `You are a personalized intelligent teacher for Brainclave, not just a chatbot.
+You have access to the student's learning profile:
+- Subjects: ${subs || 'None yet'}
+- Weak Topics: ${weaks || 'None currently'}
+- Pending Tasks: ${tasks || 'None currently'}
+
+Guidelines:
+- Act as an intelligent study companion.
+- Use Socratic questioning to guide the user. Give hints, conceptual nudges, and step-by-step thinking approaches instead of direct answers.
+- Keep responses concise (1-3 sentences) optimized for voice conversation.
+- Speak clearly and professionally.`;
+  }, [memory.subjects, memory.weakTopics, memory.tasks]);
 
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [transcript, setTranscript] = useState('');
@@ -51,6 +72,58 @@ export function VoiceTab() {
     setVoiceState('idle');
     return false;
   }, [vadLoader, sttLoader, llmLoader, ttsLoader]);
+
+  // Process a speech segment through the full pipeline
+  const processSpeech = useCallback(async (audioData: Float32Array) => {
+    const pipeline = pipelineRef.current;
+    if (!pipeline) return;
+
+    // Stop mic during processing
+    micRef.current?.stop();
+    vadUnsub.current?.();
+    setVoiceState('processing');
+
+    try {
+      const result = await pipeline.processTurn(audioData, {
+        maxTokens: 60,
+        temperature: 0.7,
+        systemPrompt: systemPrompt,
+      }, {
+        onTranscription: (text) => {
+          setTranscript(text);
+        },
+        onResponseToken: (_token, accumulated) => {
+          setResponse(accumulated);
+        },
+        onResponseComplete: (text) => {
+          setResponse(text);
+        },
+        onSynthesisComplete: async (audio, sampleRate) => {
+          setVoiceState('speaking');
+          const player = new AudioPlayback({ sampleRate });
+          await player.play(audio, sampleRate);
+          player.dispose();
+        },
+        onStateChange: (s) => {
+          if (s === 'processingSTT') setVoiceState('processing');
+          if (s === 'generatingResponse') setVoiceState('processing');
+          if (s === 'playingTTS') setVoiceState('speaking');
+        },
+      });
+
+      if (result) {
+        setTranscript(result.transcription);
+        setResponse(result.response);
+        await memory.addHistory('voice', 'user', result.transcription);
+        await memory.addHistory('voice', 'assistant', result.response);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+
+    setVoiceState('idle');
+    setAudioLevel(0);
+  }, [systemPrompt, memory]);
 
   // Start listening
   const startListening = useCallback(async () => {
@@ -94,57 +167,7 @@ export function VoiceTab() {
       (chunk) => { VAD.processSamples(chunk); },
       (level) => { setAudioLevel(level); },
     );
-  }, [ensureModels]);
-
-  // Process a speech segment through the full pipeline
-  const processSpeech = useCallback(async (audioData: Float32Array) => {
-    const pipeline = pipelineRef.current;
-    if (!pipeline) return;
-
-    // Stop mic during processing
-    micRef.current?.stop();
-    vadUnsub.current?.();
-    setVoiceState('processing');
-
-    try {
-      const result = await pipeline.processTurn(audioData, {
-        maxTokens: 60,
-        temperature: 0.7,
-        systemPrompt: 'You are a helpful voice assistant. Keep responses concise — 1-2 sentences max.',
-      }, {
-        onTranscription: (text) => {
-          setTranscript(text);
-        },
-        onResponseToken: (_token, accumulated) => {
-          setResponse(accumulated);
-        },
-        onResponseComplete: (text) => {
-          setResponse(text);
-        },
-        onSynthesisComplete: async (audio, sampleRate) => {
-          setVoiceState('speaking');
-          const player = new AudioPlayback({ sampleRate });
-          await player.play(audio, sampleRate);
-          player.dispose();
-        },
-        onStateChange: (s) => {
-          if (s === 'processingSTT') setVoiceState('processing');
-          if (s === 'generatingResponse') setVoiceState('processing');
-          if (s === 'playingTTS') setVoiceState('speaking');
-        },
-      });
-
-      if (result) {
-        setTranscript(result.transcription);
-        setResponse(result.response);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    }
-
-    setVoiceState('idle');
-    setAudioLevel(0);
-  }, []);
+  }, [ensureModels, processSpeech]);
 
   const stopListening = useCallback(() => {
     micRef.current?.stop();

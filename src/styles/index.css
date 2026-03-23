@@ -95,6 +95,28 @@ body {
   color: var(--text);
 }
 
+/* Inline SVG icon in tab buttons */
+.tab-bar button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+}
+
+.nav-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* SVG spinner animation (used with Loader2 icon) */
+svg.spinner {
+  animation: spin 0.8s linear infinite;
+  transform-origin: center;
+}
+
+
 .tab-content {
   flex: 1;
   overflow: hidden;
@@ -1191,3 +1213,601 @@ body {
 .history-time  { margin-left: auto; }
 
 .history-content { color: var(--text); }
+
+/* ===========================================================================
+ * BrainClave Tutor — Premium UI
+ * =========================================================================== */
+
+/* ── Update root design tokens ── */
+:root {
+  --bg: #0D1117;
+  --bg-card: #161B22;
+  --bg-surface: #1C2128;
+  --bg-input: #21262D;
+  --text: #E6EDF3;
+  --text-muted: #7D8590;
+  --text-dim: #484F58;
+  --primary: #F0883E;
+  --primary-soft: rgba(240,136,62,0.12);
+  --primary-hover: #D97B38;
+  --accent: #79C0FF;
+  --accent-soft: rgba(121,192,255,0.10);
+  --green: #3FB950;
+  --red: #F85149;
+  --border: #30363D;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+/* ── App shell ── */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--bg);
+}
+
+/* ── Header ── */
+.bc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+
+.bc-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bc-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary), #C75D18);
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+
+.bc-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.bc-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.bc-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.bc-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid rgba(121,192,255,0.2);
+  letter-spacing: 0.5px;
+}
+
+/* ── 2-tab nav ── */
+.bc-nav {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+
+.bc-nav-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  letter-spacing: 0.1px;
+}
+
+.bc-nav-btn .bc-nav-icon {
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+  transition: opacity 0.18s;
+}
+
+.bc-nav-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.bc-nav-btn.active .bc-nav-icon { opacity: 1; }
+
+.bc-nav-btn:hover:not(.active) {
+  color: var(--text);
+  background: rgba(255,255,255,0.03);
+}
+
+/* ── Loading screen ── */
+.bc-spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+.app-error-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--red);
+  color: white;
+  font-size: 24px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===========================================================================
+ * Tutor Panel
+ * =========================================================================== */
+
+.tutor-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Messages list ── */
+.tutor-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  scroll-behavior: smooth;
+}
+
+.tutor-messages::-webkit-scrollbar { width: 4px; }
+.tutor-messages::-webkit-scrollbar-track { background: transparent; }
+.tutor-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── Welcome screen ── */
+.tutor-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+  padding: 40px 20px;
+  gap: 16px;
+  animation: fadeUp 0.4s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tutor-welcome-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--primary), #C75D18);
+  color: white;
+  font-size: 22px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(240,136,62,0.3);
+  margin-bottom: 4px;
+}
+
+.tutor-welcome h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.tutor-welcome p {
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 340px;
+  line-height: 1.6;
+}
+
+.tutor-starter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.tutor-starter-chips button {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tutor-starter-chips button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+/* ── Message rows ── */
+.tutor-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  animation: fadeUp 0.25s ease;
+}
+
+.tutor-msg-user {
+  flex-direction: row-reverse;
+}
+
+/* ── Avatar (assistant only) ── */
+.tutor-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--primary), #C75D18);
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── Bubbles ── */
+.tutor-bubble {
+  max-width: 82%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tutor-msg-user .tutor-bubble {
+  align-items: flex-end;
+}
+
+.tutor-user-text {
+  background: var(--primary);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 16px 16px 4px 16px;
+  font-size: 14px;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+/* ── AI response markdown card ── */
+.tutor-md {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  border-radius: 4px 16px 16px 16px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.tutor-md p { margin: 0 0 8px; }
+.tutor-md p:last-child { margin-bottom: 0; }
+.tutor-md ul { padding-left: 20px; margin: 6px 0; }
+.tutor-md li { margin: 4px 0; }
+.tutor-md strong { color: var(--accent); font-weight: 600; }
+.tutor-md em { color: var(--text-muted); }
+.tutor-md h2, .tutor-md h3, .tutor-md h4 {
+  color: var(--text);
+  font-weight: 700;
+  margin: 10px 0 6px;
+}
+.tutor-md h4 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+.tutor-md code {
+  background: var(--bg-input);
+  color: var(--primary);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* ── Attachment in bubble ── */
+.tutor-attachment-img {
+  max-width: 240px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+.tutor-attachment-doc {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ── Stats footer ── */
+.tutor-stats {
+  font-size: 11px;
+  color: var(--text-dim);
+  padding-left: 4px;
+}
+
+/* ── Status indicator ── */
+.tutor-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 0 4px;
+  animation: fadeUp 0.2s ease;
+}
+
+.tutor-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+/* ── Camera overlay ── */
+.tutor-camera-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.tutor-camera-frame {
+  flex: 1;
+  background: #000;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tutor-camera-actions {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+}
+
+.tutor-cam-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+
+.tutor-cam-cancel {
+  background: var(--bg-input);
+  color: var(--text-muted);
+}
+
+.tutor-cam-cancel:hover { background: var(--border); }
+
+.tutor-cam-snap {
+  background: var(--primary);
+  color: white;
+}
+
+.tutor-cam-snap:hover:not(:disabled) { background: var(--primary-hover); }
+.tutor-cam-snap:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Input wrapper ── */
+.tutor-input-wrapper {
+  padding: 10px 14px 14px;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ── Attachment strip ── */
+.tutor-attachment-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.tutor-attachment-strip img {
+  height: 48px;
+  width: 64px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.tutor-doc-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tutor-remove-attach {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.tutor-remove-attach:hover { color: var(--red); }
+
+/* ── Input row ── */
+.tutor-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 6px 8px 6px 6px;
+  transition: border-color 0.2s;
+}
+
+.tutor-input-row:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(240,136,62,0.1);
+}
+
+/* ── Tool buttons ── */
+.tutor-tool-btns {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.tutor-tool-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.tutor-tool-btn:hover {
+  color: var(--text);
+  background: rgba(255,255,255,0.06);
+}
+
+.tutor-tool-active {
+  color: var(--primary) !important;
+  background: var(--primary-soft) !important;
+}
+
+/* ── Textarea ── */
+.tutor-textarea {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: none;
+  max-height: 120px;
+  overflow-y: auto;
+  padding: 5px 4px;
+}
+
+.tutor-textarea::placeholder { color: var(--text-dim); }
+
+.tutor-textarea::-webkit-scrollbar { width: 3px; }
+.tutor-textarea::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── Send button ── */
+.tutor-send-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  background: var(--primary);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.tutor-send-btn:hover:not(:disabled) { background: var(--primary-hover); transform: scale(1.05); }
+.tutor-send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+.tutor-stop-btn { background: var(--red); }
+.tutor-stop-btn:hover:not(:disabled) { background: #d63030; }
