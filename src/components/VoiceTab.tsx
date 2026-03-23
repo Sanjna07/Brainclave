@@ -7,10 +7,10 @@ import { ModelBanner } from './ModelBanner';
 type VoiceState = 'idle' | 'loading-models' | 'listening' | 'processing' | 'speaking';
 
 export function VoiceTab() {
-  const llmLoader = useModelLoader(ModelCategory.Language, true);
-  const sttLoader = useModelLoader(ModelCategory.SpeechRecognition, true);
-  const ttsLoader = useModelLoader(ModelCategory.SpeechSynthesis, true);
-  const vadLoader = useModelLoader(ModelCategory.Audio, true);
+  const llmLoader = useModelLoader(ModelCategory.Language, undefined, true);
+  const sttLoader = useModelLoader(ModelCategory.SpeechRecognition, undefined, true);
+  const ttsLoader = useModelLoader(ModelCategory.SpeechSynthesis, undefined, true);
+  const vadLoader = useModelLoader(ModelCategory.Audio, undefined, true);
 
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [transcript, setTranscript] = useState('');

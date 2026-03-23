@@ -17,7 +17,7 @@ interface ModelLoaderResult {
  * @param category - Which model category to ensure is loaded.
  * @param coexist  - If true, only unload same-category models (allows STT+LLM+TTS to coexist).
  */
-export function useModelLoader(category: ModelCategory, coexist = false): ModelLoaderResult {
+export function useModelLoader(category: ModelCategory, _unused?: undefined, coexist = false): ModelLoaderResult {
   const [state, setState] = useState<LoaderState>(() =>
     ModelManager.getLoadedModel(category) ? 'ready' : 'idle',
   );
