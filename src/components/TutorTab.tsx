@@ -397,9 +397,8 @@ export function TutorTab() {
       <div className="tutor-messages">
         {messages.length === 0 && (
           <div className="tutor-welcome">
-            <div className="tutor-welcome-logo">BC</div>
-            <h2>BrainClave Tutor</h2>
-            <p>Your personal study companion. Ask me anything — type it, say it, take a photo, or upload a document.</p>
+            <h2>BrainClave</h2>
+            <p>Your personal companion. Ask me anything — type it, say it, take a photo, or upload a document.</p>
             <div className="tutor-starter-chips">
               <button onClick={() => setInput('Explain this concept to me like I\'m a beginner')}>Explain a concept</button>
               <button onClick={() => setInput('Help me understand why this answer is wrong')}>Debug my thinking</button>
