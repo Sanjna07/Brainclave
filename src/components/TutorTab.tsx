@@ -242,7 +242,7 @@ export function TutorTab() {
       const { stream, result: resultPromise, cancel } = await TextGeneration.generateStream(fullPrompt, {
         maxTokens: 200,
         temperature: 0.7,
-        top_k: 40,
+        topK: 40,
       });
       cancelRef.current = cancel;
 
